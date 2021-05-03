@@ -3,33 +3,36 @@ import sqlite3, csv, json
 connection = sqlite3.connect("ANIME.db")
 cursor = connection.cursor()
 
-cursor.execute("DROP TABLE IF EXISTS AnimeList")
+cursor.execute("DROP TABLE IF EXISTS Anime")
 cursor.execute("DROP TABLE IF EXISTS Genre")
 cursor.execute("DROP TABLE IF EXISTS AnimeGenre")
 
-cursor.execute("""CREATE TABLE AnimeList(
-    anime_id int,
+cursor.execute("""CREATE TABLE Anime(
+    id int,
     title text,
     typeOfAnime text,
     aired_from text, 
     aired_to text,
     rating text, 
     score double, 
-    premiered text);""")
+    premiered text
+);""")
 
 cursor.execute("""CREATE TABLE Genre(
     genre_id int,
-    name text);""")
+    name text
+);""")
 
 cursor.execute("""CREATE TABLE AnimeGenre(
     anime_id int,
-    genre_id int);""")
+    genre_id int
+);""")
 
 with open('AnimeList.csv', 'r', encoding='utf-8') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=',', quotechar= '"')
-    next(spamreader)
+    csvreader = csv.reader(csvfile, delimiter=',', quotechar= '"')
+    next(csvreader)
     genre_map = {}
-    for row in spamreader:
+    for row in csvreader:
         (anime_id,
         title,
         title_english,
@@ -74,13 +77,13 @@ with open('AnimeList.csv', 'r', encoding='utf-8') as csvfile:
             if not g: continue
             if g not in genre_map:
                 genre_map[g] = len(genre_map)
-                cursor.execute("""INSERT INTO Genre VALUES (?,?)""", [genre_map[g], g])
-            cursor.execute("""INSERT INTO AnimeGenre VALUES (?,?)""", [anime_id, genre_map[g]])
+                cursor.execute("INSERT INTO Genre VALUES (?,?)", (genre_map[g], g))
+            cursor.execute("INSERT INTO AnimeGenre VALUES (?,?)", (anime_id, genre_map[g]))
 
-        
-        cursor.execute("""INSERT INTO AnimeList 
-        VALUES (?,?,?,?,?,?,?,?)""", 
-        [anime_id, title, typeOfAnime, aired_from, aired_to, rating, premiered, studio])
+        cursor.execute(
+            "INSERT INTO Anime VALUES (?,?,?,?,?,?,?,?)",
+            (anime_id, title, typeOfAnime, aired_from, aired_to, rating, premiered, studio)
+        )
         
 
 connection.commit()
