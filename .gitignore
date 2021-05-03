@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# database files
+ANIME.db*
+UserAnimeList.csv
+AnimeList.csv
+UserList.csv
