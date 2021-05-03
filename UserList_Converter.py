@@ -3,14 +3,15 @@ import sqlite3, csv
 connection = sqlite3.connect("ANIME.db")
 cursor = connection.cursor()
 
-cursor.execute("""DROP TABLE IF EXISTS User;""")
-cursor.execute("""CREATE TABLE IF NOT EXISTS User(
+cursor.execute("DROP TABLE IF EXISTS User;")
+cursor.execute("""CREATE TABLE User(
+    id int,
     username text
 );""")
 
 with open('UserList.csv', 'r', encoding='utf-8') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=',', quotechar= '"')
-    next(spamreader) # first row on the csv file contains the column names
+    csvreader = csv.reader(csvfile, delimiter=',', quotechar= '"')
+    next(csvreader) # first row on the csv file contains the column names
     
     for row in spamreader:
         (username,
@@ -30,7 +31,7 @@ with open('UserList.csv', 'r', encoding='utf-8') as csvfile:
         stats_mean_score,
         stats_rewatched,
         stats_episodes) = row
-        cursor.execute("INSERT INTO User VALUES (?);", [username])
+        cursor.execute("INSERT INTO User VALUES (?,?);", (user_id, username))
 
 connection.commit()
 connection.close()
