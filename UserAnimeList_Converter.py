@@ -10,6 +10,9 @@ cursor.execute("""CREATE TABLE UserAnime(
     score int
 );""")
 
+cursor.execute("SELECT username, id FROM User");
+name_id_map = dict(cursor.fetchall())
+
 with open('UserAnimeList.csv', 'r', encoding='utf-8') as csvfile:
     csvreader = csv.reader(csvfile, delimiter=',', quotechar= '"')
     next(csvreader)
@@ -26,11 +29,14 @@ with open('UserAnimeList.csv', 'r', encoding='utf-8') as csvfile:
         my_last_updated,
         my_tags) = row
         cursor.execute(
-            """INSERT INTO UserAnime (user_id, anime_id, score)
-               SELECT id, ?, ? FROM User
-               WHERE username = ?;""",
-            (anime_id, my_score, username)
+            "INSERT INTO UserAnime VALUES (?,?,?)",
+            (name_id_map[username], anime_id, my_score)
         )
+    
+    # some anime ratings by users contains a score of zero
+    # can happen if they added a status (like plan to watch)
+    # while not adding a rating. 
+    cursor.execute("DELETE FROM UserAnime WHERE score=0")
 
 connection.commit()
 connection.close()
