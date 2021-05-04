@@ -13,9 +13,9 @@ cursor.execute("""CREATE TABLE Anime(
     typeOfAnime text,
     aired_from text, 
     aired_to text,
-    rating text, 
-    score double, 
-    premiered text
+    rating text,  
+    premiered text,
+    studio text
 );""")
 
 cursor.execute("""CREATE TABLE Genre(
