@@ -21,6 +21,7 @@ class Moderator:
             typeOfAnime=?,
             aired_from=?,
             aired_to=?,
+            rating=?,
             premiered=?,
             studio=?
         WHERE anime_id=?""", (title, typeOfAnime, aired_from, aired_to, rating, premiered, studio, anime_id))
