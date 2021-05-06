@@ -33,10 +33,14 @@ def convert_user_anime_csv_to_db(conn: Connection, filename: str):
                  my_rewatching_ep,
                  my_last_updated,
                  my_tags) = row
-                conn.execute(
-                    'INSERT INTO UserAnime VALUES (?,?,?)',
-                    (name_id_map[username], anime_id, my_score)
-                )
+
+                try:
+                    conn.execute(
+                        'INSERT INTO UserAnime VALUES (?,?,?)',
+                        (name_id_map[username], anime_id, my_score)
+                    )
+                except Exception:
+                    pass
 
             # some anime ratings by users contains a score of zero
             # can happen if they added a status (like plan to watch)
