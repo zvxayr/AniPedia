@@ -129,7 +129,5 @@ dmypy.json
 .pyre/
 
 # database files
-ANIME.db*
-UserAnimeList.csv
-AnimeList.csv
-UserList.csv
+*.db
+*.csv
