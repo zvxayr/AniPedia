@@ -9,6 +9,7 @@ class User:
     user_id: int
     username: str
     password: str
+    ui_theme: str
 
     def rate_anime(self, conn: Connection, anime_id: int, score: int) -> NoReturn:
         query = 'INSERT INTO UserAnime(user_id, anime_id, score) VALUES (?,?,?)'
