@@ -20,11 +20,26 @@ class System:
             studio text,
             animeGenre text
             );""")
-        c.execute("""INSERT INTO filterTable
+        c.execute("""INSERT INTO filterTable()
             SELECT * FROM 
             WHERE condition;""")
 
-        
+    def login(self, username, pass_word):
+        c.execute("""SELECT username FROM User""")
+        while True:
+            currentu = c.fetchone()
+            print(currentu[0])
+            if currentu[0] == username:
+                break
+            if currentu == None:
+                return "Sorry, username does not exist"
+
+        c.execute("""SELECT pass_word FROM User WHERE username = ?""", (username,))
+        currentpw = c.fetchone()
+        if currentpw[0] != pass_word:
+            return -1
+        else:
+            return 1
 
     def darkLightTheme(self, theme):
         self.theme = theme
@@ -32,3 +47,9 @@ class System:
             return -1
         else:
             return self.theme
+
+def main():
+    System1 = System("Dark")
+    print(System1.login('karthiga', "rrca242001"))
+if __name__=="__main__":
+    main()
