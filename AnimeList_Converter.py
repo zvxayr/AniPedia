@@ -11,8 +11,8 @@ cursor.execute("""CREATE TABLE Anime(
     id int,
     title text,
     typeOfAnime text,
-    aired_from text, 
-    aired_to text,
+    aired_from date, 
+    aired_to date,
     rating text,  
     premiered text,
     studio text
