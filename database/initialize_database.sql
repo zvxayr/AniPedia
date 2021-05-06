@@ -1,19 +1,19 @@
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS Anime(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     type TEXT,
     aired_from DATE, 
     aired_to DATE,
     rating TEXT,
     premiered TEXT,
-    studio TEXT
+    studio TEXT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 CREATE TABLE IF NOT EXISTS Genre(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE
+    name TEXT UNIQUE,
+    id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 CREATE TABLE IF NOT EXISTS AnimeGenre(
@@ -32,10 +32,10 @@ CREATE TABLE IF NOT EXISTS AnimeGenre(
 );
 
 CREATE TABLE IF NOT EXISTS User(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE,
     password TEXT,
-    ui_theme TEXT
+    ui_theme TEXT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 CREATE TABLE IF NOT EXISTS UserAnime(

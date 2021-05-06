@@ -39,7 +39,7 @@ def convert_user_csv_to_db(conn: Connection, filename: str):
 
                 try:
                     conn.execute(
-                        'INSERT INTO User VALUES (?,?,"",NULL);', (user_id, username))
+                        'INSERT INTO User VALUES (?,"",NULL,?);', (username, user_id))
                 except Exception:
                     pass
 

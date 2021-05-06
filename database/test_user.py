@@ -35,13 +35,13 @@ class TestUser(unittest.TestCase):
         """)
 
     def test_create(self):
-        User.create(TestUser.conn, 'Miles', '')
+        User.create(TestUser.conn, User('Miles', ''))
         Miles = User.from_username(TestUser.conn, 'Miles')
         self.assertEqual(Miles.username, 'Miles')
 
         # creating user with existing username
         with self.assertRaises(IntegrityError):
-            User.create(TestUser.conn, 'Vince', '')
+            User.create(TestUser.conn, User('Vince', ''))
 
     def test_from_id(self):
         NonExistentUser = User.from_id(TestUser.conn, 0)

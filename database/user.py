@@ -6,10 +6,10 @@ from typing import Optional, NoReturn
 
 @dataclass
 class User:
-    user_id: int
     username: str
     password: str
-    ui_theme: str
+    ui_theme: Optional[str] = None
+    user_id: int = None
 
     def rate_anime(self, conn: Connection, anime_id: int, score: int) -> NoReturn:
         query = 'INSERT INTO UserAnime(user_id, anime_id, score) VALUES (?,?,?)'
@@ -34,10 +34,10 @@ class User:
             self.password = new_password
 
     @staticmethod
-    def create(conn: Connection, username: str, password: str) -> NoReturn:
-        query = 'INSERT INTO User(username, password) VALUES(?, ?)'
+    def create(conn: Connection, user: User) -> NoReturn:
+        query = 'INSERT INTO User(username, password, ui_theme) VALUES(?,?,?)'
         with conn:
-            conn.execute(query, (username, password))
+            conn.execute(query, (user.username, user.password, user.ui_theme))
 
     @staticmethod
     def from_id(conn: Connection, user_id: int) -> Optional[User]:

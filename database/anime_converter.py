@@ -71,8 +71,8 @@ def convert_anime_csv_to_db(conn: Connection, filename: str):
 
                 conn.execute(
                     'INSERT INTO Anime VALUES (?,?,?,?,?,?,?,?)',
-                    (anime_id, title, anime_type, aired_from,
-                        aired_to, rating, premiered, studio)
+                    (title, anime_type, aired_from, aired_to,
+                     rating, premiered, studio, anime_id)
                 )
 
                 genres = genre.split(", ")
@@ -82,7 +82,7 @@ def convert_anime_csv_to_db(conn: Connection, filename: str):
                     if g not in genre_map:
                         genre_map[g] = len(genre_map)
                         conn.execute(
-                            'INSERT INTO Genre VALUES (?,?)', (genre_map[g], g))
+                            'INSERT INTO Genre VALUES (?,?)', (g, genre_map[g]))
                     conn.execute(
                         'INSERT INTO AnimeGenre VALUES (?,?)', (anime_id, genre_map[g]))
 
