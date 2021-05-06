@@ -4,21 +4,39 @@ connection = sqlite3.connect("ANIME.db")
 c = connection.cursor()
 
 class User:
-    def __init__ (self, Username):
-        self.Username = Username
+    def __init__ (self, username, password):
+        self.username = username
+        self.password = password
 
-    def rateAnime(self, rate, anime_id):
-        c.execute("""SELECT my_score FROM UserAnime 
-        WHERE Username = :Username and anime_id = :anime_id""", {'Username': self.Username, 'anime_id': anime_id})
-        Username = c.fetchone()
+    def rateAnime(self, rating, anime_id):
         c.execute("""UPDATE UserAnime
-        SET my_score =:rate
-        WHERE anime_id =:anime_id and Username =:Username""", {'rate': rate, 'anime_id': anime_id, 'Username': self.Username})
+        SET my_score =?
+        WHERE anime_id =? and Username =?""", (rating, anime_id, self.username))
+        connection.commit()
+
+    def changePassword(self, newpassword):
+        self.password = newpassword
+        c.execute("""UPDATE User
+        SET pass_word = ?
+        WHERE Username = ?""", (self.password, self.username))
+        connection.commit()
+
+    def changeUsername(self, newUsername):
+        c.execute("""UPDATE UserAnime
+        SET Username = ?
+        WHERE Username = ?""", (newUsername, self.username))
+        c.execute("""UPDATE User
+        SET Username = ?
+        WHERE Username = ?""", (newUsername, self.username))
+        self.username = newUsername
         connection.commit()
 
 def main():
-    User1 = User("karthiga")
-    User1.rateAnime(4, 21)
+    User1 = User("karthiga", "rrca242001")
+    # User1.rateAnime(4, 21)
+    # User1.changeUsername("Rance")
+    User1.filterAnime("TV", "PG-13 - Teens 13 or older", "Winter 2012", "David Production")
+    User1.changePassword("rrca242001")
 
 if __name__ == "__main__":
     main()

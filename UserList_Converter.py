@@ -33,5 +33,8 @@ with open('UserList.csv', 'r', encoding='utf-8') as csvfile:
         stats_episodes) = row
         cursor.execute("INSERT INTO User VALUES (?,?);", (user_id, username))
 
+cursor.execute("""ALTER TABLE User
+        ADD pass_word VARCHAR(25)""")
+
 connection.commit()
 connection.close()
