@@ -13,7 +13,7 @@ with open('UserList.csv', 'r', encoding='utf-8') as csvfile:
     csvreader = csv.reader(csvfile, delimiter=',', quotechar= '"')
     next(csvreader) # first row on the csv file contains the column names
     
-    for row in spamreader:
+    for row in csvreader:
         (username,
         user_id,
         user_watching,
@@ -32,6 +32,9 @@ with open('UserList.csv', 'r', encoding='utf-8') as csvfile:
         stats_rewatched,
         stats_episodes) = row
         cursor.execute("INSERT INTO User VALUES (?,?);", (user_id, username))
+
+cursor.execute("""ALTER TABLE User
+        ADD pass_word VARCHAR(25)""")
 
 connection.commit()
 connection.close()

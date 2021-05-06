@@ -11,11 +11,11 @@ cursor.execute("""CREATE TABLE Anime(
     id int,
     title text,
     typeOfAnime text,
-    aired_from text, 
-    aired_to text,
-    rating text, 
-    score double, 
-    premiered text
+    aired_from date, 
+    aired_to date,
+    rating text,  
+    premiered text,
+    studio text
 );""")
 
 cursor.execute("""CREATE TABLE Genre(
