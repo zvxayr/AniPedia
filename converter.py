@@ -1,3 +1,0 @@
-import AnimeList_Converter
-import UserList_Converter
-import UserAnimeList_Converter
