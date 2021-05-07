@@ -2,18 +2,19 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS Anime(
     title TEXT NOT NULL,
-    type TEXT,
+    anime_type TEXT,
     aired_from DATE, 
     aired_to DATE,
     rating TEXT,
     premiered TEXT,
     studio TEXT,
-    id INTEGER PRIMARY KEY AUTOINCREMENT
+    anime_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    UNIQUE(title, anime_type)
 );
 
 CREATE TABLE IF NOT EXISTS Genre(
     name TEXT UNIQUE,
-    id INTEGER PRIMARY KEY AUTOINCREMENT
+    genre_id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 CREATE TABLE IF NOT EXISTS AnimeGenre(
@@ -22,12 +23,12 @@ CREATE TABLE IF NOT EXISTS AnimeGenre(
 
     CONSTRAINT fk_Anime
         FOREIGN KEY(anime_id)
-        REFERENCES Anime(id)
+        REFERENCES Anime(anime_id)
         ON DELETE CASCADE
     
     CONSTRAINT fk_Genre
         FOREIGN KEY(genre_id)
-        REFERENCES Genre(id)
+        REFERENCES Genre(genre_id)
         ON DELETE CASCADE
 );
 
@@ -35,7 +36,7 @@ CREATE TABLE IF NOT EXISTS User(
     username TEXT UNIQUE,
     password TEXT,
     ui_theme TEXT,
-    id INTEGER PRIMARY KEY AUTOINCREMENT
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
 CREATE TABLE IF NOT EXISTS UserAnime(
@@ -45,12 +46,12 @@ CREATE TABLE IF NOT EXISTS UserAnime(
 
     CONSTRAINT fk_User
         FOREIGN KEY(user_id)
-        REFERENCES User(id)
+        REFERENCES User(user_id)
         ON DELETE CASCADE
 
     CONSTRAINT fk_Anime
         FOREIGN KEY(anime_id)
-        REFERENCES Anime(id)
+        REFERENCES Anime(anime_id)
         ON DELETE CASCADE
 
     UNIQUE(user_id, anime_id) ON CONFLICT REPLACE

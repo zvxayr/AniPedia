@@ -9,7 +9,7 @@ class User:
     username: str
     password: str
     ui_theme: Optional[str] = None
-    user_id: int = None
+    user_id: Optional[int] = None
 
     def rate_anime(self, conn: Connection, anime_id: int, score: int) -> NoReturn:
         query = 'INSERT INTO UserAnime(user_id, anime_id, score) VALUES (?,?,?)'
@@ -22,13 +22,13 @@ class User:
             conn.execute(query, (self.user_id, anime_id))
 
     def change_username(self, conn: Connection, new_username: str) -> NoReturn:
-        query = 'UPDATE User SET username = ? WHERE id = ?'
+        query = 'UPDATE User SET username=? WHERE user_id=?'
         with conn:
             conn.execute(query, (new_username, self.user_id))
             self.username = new_username
 
     def change_password(self, conn: Connection, new_password: str) -> NoReturn:
-        query = 'UPDATE User SET password = ? WHERE id = ?'
+        query = 'UPDATE User SET password=? WHERE user_id=?'
         with conn:
             conn.execute(query, (self.password, self.user_id))
             self.password = new_password
@@ -41,7 +41,7 @@ class User:
 
     @staticmethod
     def from_id(conn: Connection, user_id: int) -> Optional[User]:
-        query = 'SELECT * from User WHERE id=?'
+        query = 'SELECT * from User WHERE user_id=?'
         if data := conn.execute(query, (user_id,)).fetchone():
             return User(*data)
 

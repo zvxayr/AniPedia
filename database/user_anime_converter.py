@@ -14,7 +14,7 @@ def clean_tables(conn: Connection):
 def convert_user_anime_csv_to_db(conn: Connection, filename: str):
     clean_tables(conn)
 
-    cursor = conn.execute('SELECT username, id FROM User')
+    cursor = conn.execute('SELECT username, user_id FROM User')
     name_id_map = dict(cursor.fetchall())
 
     with foreign_key_checks_off(conn):
