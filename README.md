@@ -1,4 +1,4 @@
-# AniPedia [![](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/) ![t](https://img.shields.io/badge/status-unstable-red.svg)
+# AniPedia [![](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/) ![t](https://img.shields.io/badge/status-unstable-red.svg)
 
 ## Setup
 1. Download or clone this repository
