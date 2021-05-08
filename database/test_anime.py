@@ -40,13 +40,22 @@ class TestAnime(unittest.TestCase):
     def test_search(self):
         # test pagination
         conn = TestAnime.conn
-        self.assertEqual(len(Anime.search(conn, '', limit=1, page=2)), 1)
-        self.assertEqual(len(Anime.search(conn, '', limit=1, page=1)), 1)
-        self.assertEqual(len(Anime.search(conn, '', limit=2, page=1)), 2)
-        self.assertEqual(len(Anime.search(conn, '', limit=2, page=2)), 1)
+        self.assertEqual(len(Anime.search(conn, limit=1, page=2)), 1)
+        self.assertEqual(len(Anime.search(conn, limit=1, page=1)), 1)
+        self.assertEqual(len(Anime.search(conn, limit=2, page=1)), 2)
+        self.assertEqual(len(Anime.search(conn, limit=2, page=2)), 1)
 
         # test title searching
-        self.assertEqual(len(Anime.search(conn, 'cowboy')), 2)
+        self.assertEqual(len(Anime.search(conn, title='cowboy')), 2)
+
+        # test genre inclusion and exclusion
+        self.assertEqual(len(Anime.search(conn, include_genres=[1])), 3)
+        ActionAdventureComedy = Anime.search(conn, include_genres=[1, 2, 3])
+        self.assertEqual(len(ActionAdventureComedy), 1)
+        self.assertEqual(ActionAdventureComedy[0].title, 'Cowboy Bebop')
+        self.assertEqual(len(Anime.search(conn, exclude_genres=[1])), 0)
+        self.assertEqual(len(Anime.search(conn, exclude_genres=[5])), 2)
+        self.assertEqual(len(Anime.search(conn, include_genres=[4], exclude_genres=[5])), 1)
 
     def test_create(self):
         conn = TestAnime.conn
@@ -54,10 +63,10 @@ class TestAnime(unittest.TestCase):
         Movieversion = Anime('Run Ronald', 'Movie')
 
         Anime.create(conn, TVversion)
-        self.assertEqual(len(Anime.search(conn, 'Run Ronald')), 1)
+        self.assertEqual(len(Anime.search(conn, title='Run Ronald')), 1)
 
         Anime.create(conn, Movieversion)
-        self.assertEqual(len(Anime.search(conn, 'Run Ronald')), 2)
+        self.assertEqual(len(Anime.search(conn, title='Run Ronald')), 2)
 
         with self.assertRaises(IntegrityError):
             Anime.create(conn, TVversion)
@@ -78,6 +87,17 @@ class TestAnime(unittest.TestCase):
 
         with self.assertRaises(IntegrityError):
             Trigun.update(conn, anime_id=10)
+
+    def test_get_genres(self):
+        conn = TestAnime.conn
+        Trigun = Anime.from_id(conn, 3)
+        self.assertCountEqual(Trigun.get_genres(conn), (1, 2, 5))
+
+    def test_set_genres(self):
+        conn = TestAnime.conn
+        Trigun = Anime.from_id(conn, 3)
+        Trigun.set_genres(conn, [1, 3, 5])
+        self.assertCountEqual(Trigun.get_genres(conn), (1, 3, 5))
 
 
 if __name__ == '__main__':
