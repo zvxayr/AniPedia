@@ -17,4 +17,6 @@ if __name__ == '__main__':
     print('Processed AnimeList.csv')
     convert_user_anime_csv_to_db(conn, 'UserAnimeList.csv')
     print('Processed UserAnimeList.csv')
+    conn.execute('VACUUM')
+    print('Vacuumed Database')
     conn.close()

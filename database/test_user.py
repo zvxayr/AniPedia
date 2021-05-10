@@ -23,9 +23,9 @@ class TestUser(unittest.TestCase):
         ratings = [(1, 1, 8), (1, 2, 9), (2, 1, 10)]
 
         em = TestUser.conn.executemany
-        em('INSERT INTO User(id, username, password) VALUES(?, ?, "")', users)
-        em('INSERT INTO Anime(id, title) VALUES(?, ?)', animes)
-        em('INSERT INTO UserAnime VALUES(?, ?, ?)', ratings)
+        em('INSERT INTO User(user_id, username, password) VALUES(?,?,"")', users)
+        em('INSERT INTO Anime(anime_id, title) VALUES(?,?)', animes)
+        em('INSERT INTO UserAnime VALUES(?,?,?)', ratings)
 
     def tearDown(self):
         TestUser.conn.executescript("""
