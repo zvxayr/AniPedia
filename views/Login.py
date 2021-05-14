@@ -1,5 +1,10 @@
 import wx
-from pubsub import pub
+from wx.lib.pubsub import pub
+from database import User
+from database.helper import get_connection
+from config import dbpath
+from views.advanced_search import AdvancedSearch
+from views.advanced_search import AdvancedSFrame
 
 class LoginDialog(wx.Dialog):
     def __init__(self):
@@ -66,18 +71,17 @@ class LoginDialog(wx.Dialog):
         
                
     def onLogin(self, event):
-        sample_username = "sample"
-        sample_password = "sample"
-        user_username = self.username.GetValue()
-        user_password = self.password.GetValue()
+        with get_connection(dbpath) as conn:
+            user_username = self.username.GetValue()
+            user_password = self.password.GetValue()
+            self.user = User.from_username(conn, user_username)
         
-        if user_password == sample_password and user_username == sample_username:
-            print("You are now logged in!")
-            pub.sendMessage("frameListener", message="show")
-            self.Destroy()
-        else:
-            print("Username or password is incorrect!")
-            
+        if self.user.password == user_password and self.user.username == user_username:
+            rec_window = AdvancedSFrame(self, 'Advanced Search')
+            AdvancedSearch(rec_window).Show
+            rec_window.Show()
+            self.Hide()
+
 class MyPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)

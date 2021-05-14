@@ -135,6 +135,10 @@ class AdvancedSearch(wx.lib.scrolledpanel.ScrolledPanel):
         conn = get_connection(dbpath)
         print(Anime.search(conn, title=title, include_genres=include_genres, exclude_genres=exclude_genres))
 
+class AdvancedSFrame(wx.Frame):
+    def __init__(self, parent, title):
+        wx.Frame.__init__(self, parent, -1, title, (0, 0), (1280, 720),
+            wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
 
 if __name__ == '__main__':
     title = 'Advanced Search'
