@@ -189,7 +189,6 @@ class AdvancedSearch(wx.Panel):
         Studio.SetForegroundColour("white")
         Studio.SetFont(StudioFont)
         
-        
     def prevpage(self, event):
         pass
 
