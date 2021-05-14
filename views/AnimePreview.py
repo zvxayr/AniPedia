@@ -188,36 +188,10 @@ class AdvancedSearch(wx.Panel):
         Studio.Wrap(690)
         Studio.SetForegroundColour("white")
         Studio.SetFont(StudioFont)
-
-
-        # AnimeGenre = "Genre: "
-        # body_vbox.Add(AnimeSynopsis := wx.StaticText(body, label = AnimeSynopsis), flag = wx.LEFT | wx.TOP, border = 20)
-        # AnimeSynopsisFont = wx.Font(pointSize = 16, family = wx.DEFAULT,
-        #        style = wx.NORMAL, weight = wx.NORMAL,
-        #        faceName = 'Arial')
         
-        # AnimeSynopsis.Wrap(690)
-        # AnimeSynopsis.SetForegroundColour("white")
-        # AnimeSynopsis.SetFont(AnimeSynopsisFont)
-
         
     def prevpage(self, event):
         pass
-
-        # header_hbox.Add(poster := wx.StaticBitmap(header, wx.ID_ANY, wx.Bitmap('poster.png', type = wx.BITMAP_TYPE_PNG)))
-
-        # top_vbox.Add(body := wx.lib.scrolledpanel.ScrolledPanel(self,-1, size = (500, 500), style=wx.SIMPLE_BORDER), 1, flag = wx.EXPAND, border=160)
-        # body.SetupScrolling()
-        # body.SetSizer(body_vbox := wx.BoxSizer(wx.VERTICAL))
-        # body.SetBackgroundColour('red')
-
-        # text = 100 * "I'm subclasses the statictext because I want it to act exactly like a static text, but correctly wordwrap as needed. I've found several examples of it on the web, but none that worked how I wanted. The wordwrap makes it look much nicer when the user may decide to re-size the window, so I would definitely like to have it be wordwrapped. I know about the wx.lib.wordwrap, but chose to use the built in Wrap function of the statictext control instead. It basically does the same thing from what I understand.\n"
-        # txt = wx.StaticText(body, label=text)
-        # body_vbox.Add(txt, 1, wx.EXPAND | wx.ALL, 10)
-
-        # self.search_box = search_box
-        # # self.search_btn = search_btn
-
 
 if __name__ == '__main__':
     title = 'Anime Preview'
