@@ -74,8 +74,10 @@ class Option(wx.Panel):
 
 
 class AdvancedSearch(wx.lib.scrolledpanel.ScrolledPanel):
-    def __init__(self, parent):
+    def __init__(self, parent, on_search_results=lambda: None):
         super().__init__(parent)
+
+        self.on_search_results = on_search_results
 
         self.build_ui()
 
@@ -131,14 +133,17 @@ class AdvancedSearch(wx.lib.scrolledpanel.ScrolledPanel):
                 continue
 
             exclude_genres.append(option.genre_id)
-                
+
         conn = get_connection(dbpath)
-        print(Anime.search(conn, title=title, include_genres=include_genres, exclude_genres=exclude_genres))
+        self.on_search_results(Anime.search(conn, title=title,
+              include_genres=include_genres, exclude_genres=exclude_genres))
+
 
 class AdvancedSFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, -1, title, (0, 0), (1280, 720),
-            wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
+                          wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
+
 
 if __name__ == '__main__':
     title = 'Advanced Search'
