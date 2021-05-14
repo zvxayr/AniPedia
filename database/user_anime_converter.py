@@ -21,6 +21,7 @@ def convert_user_anime_csv_to_db(conn: Connection, filename: str):
         with open('UserAnimeList.csv', 'r', encoding='utf-8') as csvfile:
             csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
             next(csvreader)
+
             for row in csvreader:
                 (username,
                  anime_id,
@@ -33,7 +34,7 @@ def convert_user_anime_csv_to_db(conn: Connection, filename: str):
                  my_rewatching_ep,
                  my_last_updated,
                  my_tags) = row
-                     
+
                 try:
                     conn.execute(
                         'INSERT INTO UserAnime VALUES (?,?,?)',

@@ -12,6 +12,7 @@ from pubsub import *
 from database.helper import get_connection
 from config import dbpath
 from database import Anime
+from database import User
 
 class GatherInfo:
     def getposter(self, title):
@@ -59,7 +60,7 @@ class GatherInfo:
         return "Synopsis: \n \n" + details_dict['data']['attributes']['synopsis']
 
 
-class AdvancedSearch(wx.Panel):
+class AnimePreview(wx.Panel):
     def __init__(self, parent, title):
         super().__init__(parent)
         self.title = title
@@ -67,10 +68,12 @@ class AdvancedSearch(wx.Panel):
         
 
     def build_ui(self):
-        # conn = 
+        self.username = 'Xinil'
+        self.password = ''
         self.gatherinfo = GatherInfo()
         self.SetBackgroundColour('#1D1F21')
         self.SetSizer(top_vbox := wx.BoxSizer(wx.VERTICAL))
+        self.user = User(self.username, self.password)
 
         top_vbox.Add(header := wx.Panel(self, size=(-1, 60)), 0, wx.EXPAND)
         header.SetSizer(header_hbox := wx.BoxSizer(wx.HORIZONTAL))
@@ -87,7 +90,15 @@ class AdvancedSearch(wx.Panel):
 
         AnipediaLabel.SetFont(Titlefont)
 
-        header_hbox.Add(innerpanel := wx.Panel(header, size = (50, 80)), wx.ALIGN_RIGHT | wx.EXPAND)
+        header_hbox.Add(ratingpanel:= wx.Panel(header, size = (120, -1 )), wx.ALIGN_RIGHT)
+        ratingpanel.SetSizer(ratingpanel_vbox:= wx.BoxSizer(wx.VERTICAL))
+        ratingpanel_vbox.Add(rate_btn := wx.Button(ratingpanel, label='Rate this anime?', size = (120, 80)), flag = wx.ALIGN_RIGHT)
+        rate_btn.SetBackgroundColour('#7B5B94')
+
+        header_hbox.Add(rate_box := wx.TextCtrl(header, size = (120, 40)), flag = wx.TOP| wx.RIGHT, border = 10)
+        rate_box.SetHint('Rate Anime...')
+
+        header_hbox.Add(innerpanel := wx.Panel(header, size = (120, 80)), wx.ALIGN_RIGHT)
         innerpanel.SetSizer(innerpanel_vbox :=wx.BoxSizer(wx.VERTICAL))
         innerpanel_vbox.Add(back_btn := wx.Button(innerpanel, label='Back', size = (120, 80)), flag = wx.ALIGN_RIGHT)
         back_btn.SetBackgroundColour('#7B5B94')
@@ -119,7 +130,7 @@ class AdvancedSearch(wx.Panel):
                 self.Anime = Anime.search(conn, title = title)[0]
             except Exception:
                 self.Anime = None
-
+                
         self.Genre = Anime.get_genres(self.Anime, conn)
         genre_names = list(map(lambda g: g.name, self.Genre))
         print(genre_names)
@@ -134,6 +145,9 @@ class AdvancedSearch(wx.Panel):
         Type = self.Anime.anime_type
         Premiere = self.Anime.premiered
         Studio = self.Anime.studio
+        self.ID = self.Anime.anime_id
+
+        rate_btn.Bind(wx.EVT_BUTTON, self.rateanime)
 
         #Genres
         body_vbox.Add(Animegenres := wx.StaticText(body, label = Animegenres), flag = wx.LEFT | wx.TOP, border = 20)
@@ -189,6 +203,15 @@ class AdvancedSearch(wx.Panel):
         Studio.SetForegroundColour("white")
         Studio.SetFont(StudioFont)
         
+    def rateanime(self, event):
+            rating = self.rate_box.GetValue()
+            if rating != 0-10:
+                self.rate_box.SetHint('Invalid Input')
+            else:
+                with get_connection(dbpath) as conn:
+                    user_rating = int(rating)
+                    self.user.rate_anime(conn, ID, user_rating)
+
     def prevpage(self, event):
         pass
 
@@ -200,7 +223,7 @@ if __name__ == '__main__':
     app = wx.App()
     frame = wx.Frame(None, title=title, size=size, style=style)
     title = 'Fullmetal Alchemist: Brotherhood'
-    AdvancedSearch(frame, title)
+    AnimePreview(frame, title)
     frame.Center()
     frame.Show()
     app.MainLoop()
