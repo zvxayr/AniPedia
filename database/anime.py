@@ -5,7 +5,6 @@ from dataclasses import dataclass, asdict
 from typing import Optional, NoReturn
 from itertools import chain
 
-
 @dataclass
 class Anime:
     title: str
@@ -19,11 +18,11 @@ class Anime:
 
     def get_genres(self, conn: Connection) -> list[int]:
         query = """
-        SELECT Genre.genre_id FROM AnimeGenre
+        SELECT Genre.* FROM AnimeGenre
             LEFT JOIN Genre ON Genre.genre_id=AnimeGenre.genre_id
             WHERE anime_id=?
         """
-        return tuple(x[0] for x in conn.execute(query, (self.anime_id,)))
+        return tuple(Genre(*x) for x in conn.execute(query, (self.anime_id,)))
 
     def update(self, conn: Connection, **kwargs) -> NoReturn:
         values = kwargs | {'id': self.anime_id}

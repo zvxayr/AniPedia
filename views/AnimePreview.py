@@ -1,21 +1,23 @@
 from sqlite3 import Connection
-from glooey.misc import Placeholder
 import pyglet
-import glooey
 import json
 import urllib.request
 from urllib.request import urlopen, Request
 from PIL import Image
+from database import Genre, get_connection
+from config import dbpath
+import wx
+import wx.lib.scrolledpanel
+from pubsub import *
+from database.helper import get_connection
+from config import dbpath
+from database import Anime
 
 class GatherInfo:
     def getposter(self, title):
-        title_parts = title.split(' ')
-        self.title = ''
-        for word in title_parts:
-            self.title = self.title + word + '%20'
-        self.title = self.title[:-3]
-        url = 'https://kitsu.io/api/edge/anime?filter[text]=' + self.title + '''=(Title)&fields[anime]=canonicalTitle,posterImage&page[limit]=1&page[offset]=0
-        '''
+        self.title = title.replace(' ', '%20')
+        url = f"""https://kitsu.io/api/edge/anime?filter[text]={self.title}=(Title)&fields[anime]=canonicalTitle,posterImage&page[limit]=1&page[offset]=0
+        """
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
         reg_url = url
         req = Request(url=reg_url, headers=headers) 
@@ -36,17 +38,17 @@ class GatherInfo:
         for word in title_parts:
             self.title = self.title + word + '%20'
         self.title = self.title[:-3]
-        main_url = 'https://kitsu.io/api/edge/anime?filter[text]=' + self.title + '''=(Title)&fields[anime]=canonicalTitle,posterImage&page[limit]=1&page[offset]=0
-        '''
+        main_url = f"""https://kitsu.io/api/edge/anime?filter[text]={self.title}=(Title)&fields[anime]=canonicalTitle,posterImage&page[limit]=1&page[offset]=0
+        """
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
         reg_url = main_url
         req = Request(url=reg_url, headers=headers) 
-        main_link = urlopen(req).read() 
+        main_link = urlopen(req).read()
 
         json_string=main_link
         main_dict=json.loads(json_string)
         details_url=(main_dict['data'][0]['links']['self'])
-
+        
         reg_url = details_url
         req = Request(url=reg_url, headers=headers) 
         details_link = urlopen(req).read() 
@@ -54,174 +56,178 @@ class GatherInfo:
         json_string1=details_link
         details_dict=json.loads(json_string1)
 
-        return "Synopsis: " + details_dict['data']['attributes']['synopsis']
+        return "Synopsis: \n \n" + details_dict['data']['attributes']['synopsis']
 
 
+class AdvancedSearch(wx.Panel):
+    def __init__(self, parent, title):
+        super().__init__(parent)
+        self.title = title
+        self.build_ui()
+        
 
-class BackButton(glooey.Button):
-    custom_height_hint = 50
-    custom_width_hint = 80
-    custom_alignment = 'right'
+    def build_ui(self):
+        # conn = 
+        self.gatherinfo = GatherInfo()
+        self.SetBackgroundColour('#1D1F21')
+        self.SetSizer(top_vbox := wx.BoxSizer(wx.VERTICAL))
 
-    class Foreground(glooey.Label):
-        custom_color = '#babdb6'
-        custom_font_size = 10
-        custom_alignment = 'center'
+        top_vbox.Add(header := wx.Panel(self, size=(-1, 60)), 0, wx.EXPAND)
+        header.SetSizer(header_hbox := wx.BoxSizer(wx.HORIZONTAL))
+        header.SetBackgroundColour('#A286B8')
+        
+        header_hbox.Add(AnipediaLabelContainer := wx.Panel(header, size = (50, -1)), wx.ALIGN_LEFT | wx.EXPAND | wx.LEFT, border = 20)
+        AnipediaLabelContainer.SetSizer(AnipediaLabelContainer_hbox := wx.BoxSizer(wx.VERTICAL))
+        AnipediaLabelContainer_hbox.Add(AnipediaLabel := wx.StaticText(AnipediaLabelContainer), flag = wx.LEFT | wx.TOP, border = 10)
+        AnipediaLabel.SetLabel('Anipedia')
 
-    class Base(glooey.Background):
-        custom_color = '#204a87'
-        custom_outline = 'yellow'
+        Titlefont = wx.Font(pointSize = 22, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL,
+               faceName = 'Arial Bold')
 
-    class Over(glooey.Background):
-        custom_color = '#3465a4'
-        custom_outline = 'yellow'
+        AnipediaLabel.SetFont(Titlefont)
 
-    class Down(glooey.Background):
-        custom_color = '#729fcfff'
-        custom_outline = 'yellow'
+        header_hbox.Add(innerpanel := wx.Panel(header, size = (50, 80)), wx.ALIGN_RIGHT | wx.EXPAND)
+        innerpanel.SetSizer(innerpanel_vbox :=wx.BoxSizer(wx.VERTICAL))
+        innerpanel_vbox.Add(back_btn := wx.Button(innerpanel, label='Back', size = (120, 80)), flag = wx.ALIGN_RIGHT)
+        back_btn.SetBackgroundColour('#7B5B94')
 
-    def __init__(self):
-        super().__init__(text='Back')
+        #image
+        self.gatherinfo.getposter(self.title)
+        top_vbox.Add(body := wx.lib.scrolledpanel.ScrolledPanel(self, size = (1280, 1600), style=wx.SIMPLE_BORDER), flag = wx.CENTER)
+        body.SetupScrolling()
+        body.SetSizer(body_vbox := wx.BoxSizer(wx.VERTICAL))
+        body.SetBackgroundColour('#1A1110')
+        body_vbox.Add(poster := wx.StaticBitmap(body, wx.ID_ANY, wx.Bitmap('poster.png', type = wx.BITMAP_TYPE_PNG)), flag = wx.CENTER | wx.TOP, border = 50)
 
-    def on_click(self, _):
+
+        #info
+        body_vbox.Add(AnimeTitle := wx.StaticText(body), flag = wx.CENTER | wx.TOP, border = 20)
+        AnimeTitle.SetLabel(self.title)
+        AnimeTitleFont = wx.Font(pointSize = 22, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL, underline = True,
+               faceName = 'Arial Bold')
+        
+        AnimeTitle.SetForegroundColour("#7B5B94")
+        AnimeTitle.SetFont(AnimeTitleFont)
+
+        back_btn.Bind(wx.EVT_BUTTON, self.prevpage)
+        #self.SetSizer(self)
+
+        with get_connection(dbpath) as conn:
+            try:
+                self.Anime = Anime.search(conn, title = title)[0]
+            except Exception:
+                self.Anime = None
+
+        self.Genre = Anime.get_genres(self.Anime, conn)
+        genre_names = list(map(lambda g: g.name, self.Genre))
+        print(genre_names)
+
+        Animegenres = 'Genres: '
+        for genres in genre_names:
+            Animegenres = Animegenres + genres + ', '
+
+        Animegenres = Animegenres[:-2]
+        print(Animegenres)
+
+        Type = self.Anime.anime_type
+        Premiere = self.Anime.premiered
+        Studio = self.Anime.studio
+
+        #Genres
+        body_vbox.Add(Animegenres := wx.StaticText(body, label = Animegenres), flag = wx.LEFT | wx.TOP, border = 20)
+        AnimegenresFont = wx.Font(pointSize = 16, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL,
+               faceName = 'Arial')
+        
+        Animegenres.Wrap(690)
+        Animegenres.SetForegroundColour("white")
+        Animegenres.SetFont(AnimegenresFont)
+
+        #Type
+        Type = 'Type: ' + Type
+        body_vbox.Add(Type := wx.StaticText(body, label = Type), flag = wx.LEFT | wx.TOP, border = 20)
+        TypeFont = wx.Font(pointSize = 16, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL,
+               faceName = 'Arial')
+        
+        Type.Wrap(690)
+        Type.SetForegroundColour("white")
+        Type.SetFont(TypeFont)
+
+        #Premiere
+        Premiere = 'Premiere: ' + Premiere
+        body_vbox.Add(Premiere := wx.StaticText(body, label = Premiere), flag = wx.LEFT | wx.TOP, border = 20)
+        PremiereFont = wx.Font(pointSize = 16, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL,
+               faceName = 'Arial')
+        
+        Premiere.Wrap(690)
+        Premiere.SetForegroundColour("white")
+        Premiere.SetFont(PremiereFont)
+
+        #Synopsis
+        AnimeSynopsis = self.gatherinfo.getsynopsis(self.title)
+        body_vbox.Add(AnimeSynopsis := wx.StaticText(body, label = AnimeSynopsis), flag = wx.LEFT | wx.TOP, border = 20)
+        AnimeSynopsisFont = wx.Font(pointSize = 16, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL,
+               faceName = 'Arial')
+        
+        AnimeSynopsis.Wrap(690)
+        AnimeSynopsis.SetForegroundColour("white")
+        AnimeSynopsis.SetFont(AnimeSynopsisFont)
+
+        #studio
+        Studio = 'Studio: ' + Studio
+        body_vbox.Add(Studio := wx.StaticText(body, label = Studio), flag = wx.LEFT | wx.TOP, border = 20)
+        StudioFont = wx.Font(pointSize = 16, family = wx.DEFAULT,
+               style = wx.NORMAL, weight = wx.NORMAL,
+               faceName = 'Arial')
+        
+        Studio.Wrap(690)
+        Studio.SetForegroundColour("white")
+        Studio.SetFont(StudioFont)
+
+
+        # AnimeGenre = "Genre: "
+        # body_vbox.Add(AnimeSynopsis := wx.StaticText(body, label = AnimeSynopsis), flag = wx.LEFT | wx.TOP, border = 20)
+        # AnimeSynopsisFont = wx.Font(pointSize = 16, family = wx.DEFAULT,
+        #        style = wx.NORMAL, weight = wx.NORMAL,
+        #        faceName = 'Arial')
+        
+        # AnimeSynopsis.Wrap(690)
+        # AnimeSynopsis.SetForegroundColour("white")
+        # AnimeSynopsis.SetFont(AnimeSynopsisFont)
+
+        
+    def prevpage(self, event):
         pass
 
-class AnipediaLabel(glooey.Label):
-        custom_color = 'white'
-        custom_vert_padding = 0
-        custom_horz_padding = 20
-        custom_font_size = 20
-        custom_width_hint = 48
-        custom_height_hint = 24
-        custom_text = 'Anipedia'
-        custom_background_color = '#204a87'
-        custom_alignment = 'center'
+        # header_hbox.Add(poster := wx.StaticBitmap(header, wx.ID_ANY, wx.Bitmap('poster.png', type = wx.BITMAP_TYPE_PNG)))
 
-        class Base(glooey.Background):
-            custom_color = '#204a87'
-            custom_outline = 'yellow'
+        # top_vbox.Add(body := wx.lib.scrolledpanel.ScrolledPanel(self,-1, size = (500, 500), style=wx.SIMPLE_BORDER), 1, flag = wx.EXPAND, border=160)
+        # body.SetupScrolling()
+        # body.SetSizer(body_vbox := wx.BoxSizer(wx.VERTICAL))
+        # body.SetBackgroundColour('red')
 
-class AnimeTitle(glooey.text.Label):
-    custom_color = '#7A5299'
-    custom_vert_padding = 2
-    custom_horz_padding = 20
-    custom_font_size = 16
-    custom_alignment = 'center'
+        # text = 100 * "I'm subclasses the statictext because I want it to act exactly like a static text, but correctly wordwrap as needed. I've found several examples of it on the web, but none that worked how I wanted. The wordwrap makes it look much nicer when the user may decide to re-size the window, so I would definitely like to have it be wordwrapped. I know about the wx.lib.wordwrap, but chose to use the built in Wrap function of the statictext control instead. It basically does the same thing from what I understand.\n"
+        # txt = wx.StaticText(body, label=text)
+        # body_vbox.Add(txt, 1, wx.EXPAND | wx.ALL, 10)
 
-class AnimeInfo(glooey.text.Label):
-    custom_color = 'white'
-    custom_vert_padding = 10
-    custom_horz_padding = 20
-    custom_font_size = 10
-    custom_alignment = 'fill'
-
-class AnimePoster(glooey.Image):
-    custom_alignment = 'center'
-    custom_padding = 5
-    # def GetPoster(self, image_url):
-    #     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3'}
-    #     url = image_url
-    #     reg_url = url
-    #     req = Request(url=reg_url, headers=headers) 
-    #     self.image = Image.open(urllib.request.urlopen(req))
-        
-
-class topcontainer(glooey.HBox):
-    class Base(glooey.Background):
-        custom_color = '#204a87'
-        custom_outline = 'yellow'
-
-class ImageContainer(glooey.VBox):
-    class Base(glooey.Background):
-        custom_color = '#204a87'
-        custom_outline = 'yellow'
-
-class InfoContainer(glooey.VBox):
-    class Base(glooey.Background):
-        custom_color = '#204a87'
-        custom_outline = 'yellow'
-
-class Base(glooey.Background):
-    custom_color = '#204a87'
-    custom_outline = None
-
-class Scroll(glooey.VScrollBar):
-    custom_button_speed = 100
-
-class AnimePreview(glooey.Widget):
-    def __init__(self, connection: Connection, **kwargs):
-        super().__init__(**kwargs)
-
-        self.connection = connection
-        self.maininfo = GatherInfo()
-        self.anipedia_label = AnipediaLabel()
-        self.back_btn = BackButton()
-        self.animeinfo = AnimeInfo()
-        self.animeposter = AnimePoster()
-        self.background = Base()
-        title = 'Dragon Ball Z'
-        self.title = AnimeTitle(title)
-        self.synopsis = AnimeInfo(self.maininfo.getsynopsis(title), line_wrap = 1243)
-        self.scroll = Scroll('right')
-        
-        self.top_container = topcontainer()
-        self.image_container = ImageContainer()
-        self.info_container = InfoContainer()
-        self.back_btn.on_click = self.back_btn_click
-        # self.image_container.add_back(self.background)
-        image = self.maininfo.getposter(title)
-        self.image_container.add(AnimePoster(pyglet.image.load('poster.png')))
-
-        self.top_container.add(self.anipedia_label, size=0)
-        self.top_container.add(Placeholder())
-        self.top_container.add(self.back_btn, size=0)
-        # self.top_container.add_back(self.background, size=None)
-
-        self.image_container.custom_size_hint = 720, 500
-        # info = self.maininfo.getposter(title)
-        # print(info)
-        # final = self.animeposter.GetPoster(info)
-        # self.image_container.add(pyglet.image.load(final))
-        
-        self.info_container.add(self.title, size = 0)
-        self.info_container.add(self.synopsis, size = 0)
-        self.info_container.add(self.animeinfo, size = 0)
-        self.info_container.add(self.animeinfo, size = 0)
-        self.info_container.add(self.animeinfo, size = 0)
-        self.info_container.add(self.animeinfo, size = 0)
-
-        self.info_container._attach_child(self.scroll)
-
-        self.container = glooey.VBox()
-        self.container.custom_size_hint = 1280, 720
-        self.container.custom_alignment = 'top'
-        self.container.add(self.top_container, size=0)
-        self.container.add(self.image_container, size=0)
-        self.container.add(self.info_container, size=0)
-        
-
-        self._attach_child(self.container)
-        
-
-    def back_btn_click(self, _):
-        print("previous page")
+        # self.search_box = search_box
+        # # self.search_btn = search_btn
 
 
 if __name__ == '__main__':
-    from os import sys, path
-    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-    import config
-    from database.helper import get_connection
-    conn = get_connection(config.dbpath)
+    title = 'Anime Preview'
+    size = (1280, 720)
+    style = wx.CAPTION | wx.MINIMIZE_BOX | wx.MAXIMIZE_BOX | wx.CLOSE_BOX
 
-    window = pyglet.window.Window(1280, 720)
-    gui = glooey.Gui(window)
-    gui.add(AnimePreview(conn))
-    
-    MainPoster = AnimePoster()
-    
-    # AnimePoster.GetPoster('LOGIN_BG.png')
-    # AnimeInfo.GetInfo('Test','test')
-    pyglet.app.run()
-
-    conn.close()
+    app = wx.App()
+    frame = wx.Frame(None, title=title, size=size, style=style)
+    title = 'Fullmetal Alchemist: Brotherhood'
+    AdvancedSearch(frame, title)
+    frame.Center()
+    frame.Show()
+    app.MainLoop()
