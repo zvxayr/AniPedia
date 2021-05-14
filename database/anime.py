@@ -4,6 +4,7 @@ from datetime import date
 from dataclasses import dataclass, asdict
 from typing import Optional, NoReturn
 from itertools import chain
+from .genre import Genre
 
 @dataclass
 class Anime:
@@ -16,7 +17,7 @@ class Anime:
     studio: str = ''
     anime_id: Optional[int] = None
 
-    def get_genres(self, conn: Connection) -> list[int]:
+    def get_genres(self, conn: Connection) -> list[Genre]:
         query = """
         SELECT Genre.* FROM AnimeGenre
             LEFT JOIN Genre ON Genre.genre_id=AnimeGenre.genre_id
