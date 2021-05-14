@@ -3,8 +3,9 @@ import sqlite3
 connection = sqlite3.connect("ANIME.db")
 c = connection.cursor()
 
+
 class System:
-    def __init__ (self, theme):
+    def __init__(self, theme):
         self.theme = theme
 
     def filterAnimeDisplay(self, typeofanime, age_rating, premiered, studio):
@@ -48,8 +49,11 @@ class System:
         else:
             return self.theme
 
+
 def main():
     System1 = System("Dark")
     print(System1.login('karthiga', "rrca242001"))
-if __name__=="__main__":
+
+
+if __name__ == "__main__":
     main()
