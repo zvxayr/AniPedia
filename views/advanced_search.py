@@ -1,4 +1,4 @@
-from database import Genre, get_connection
+from database import Anime, Genre, get_connection
 from config import dbpath
 import wx
 import wx.lib.scrolledpanel
@@ -62,6 +62,16 @@ class Option(wx.Panel):
         self.Bind(wx.EVT_LEFT_DOWN, btn.toggle_state)
         txt.Bind(wx.EVT_LEFT_DOWN, btn.toggle_state)
 
+        self._btn = btn
+
+    @property
+    def state(self):
+        return self._btn.state
+
+    @property
+    def genre_id(self):
+        return self.genre.genre_id
+
 
 class AdvancedSearch(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent):
@@ -77,7 +87,8 @@ class AdvancedSearch(wx.lib.scrolledpanel.ScrolledPanel):
         header.SetSizer(header_hbox := wx.BoxSizer(wx.HORIZONTAL))
         header.SetBackgroundColour('#ededed')
 
-        header_hbox.Add(search_box := wx.TextCtrl(header))
+        header_hbox.Add(search_box := wx.TextCtrl(
+            header, style=wx.TE_PROCESS_ENTER))
         search_box.SetHint('Enter Anime Name')
 
         header_hbox.Add(search_btn := wx.Button(header, label='Search'))
@@ -86,6 +97,9 @@ class AdvancedSearch(wx.lib.scrolledpanel.ScrolledPanel):
         body.SetSizer(
             body_gs := wx.GridSizer(rows=0, cols=7, vgap=10, hgap=10))
         body.SetBackgroundColour('purple')
+
+        search_btn.Bind(wx.EVT_BUTTON, self.search)
+        search_box.Bind(wx.EVT_TEXT_ENTER, self.search)
 
         self.SetupScrolling()
         self.search_box = search_box
@@ -96,11 +110,30 @@ class AdvancedSearch(wx.lib.scrolledpanel.ScrolledPanel):
 
     def load_genres(self):
         conn = get_connection(dbpath)
-        genres = [(Option(self.body, g), 0, wx.EXPAND)
-                  for g in sorted(Genre.all(conn), key=lambda g: g.name)]
+        options = [Option(self.body, g)
+                   for g in sorted(Genre.all(conn), key=lambda g: g.name)]
 
-        self.body_gs.SetRows(ceil(len(genres) / self.body_gs.GetCols()))
-        self.body_gs.AddMany(genres)
+        self.body_gs.SetRows(ceil(len(options) / self.body_gs.GetCols()))
+        self.body_gs.AddMany([(o, 0, wx.EXPAND) for o in options])
+        self.options = options
+
+    def search(self, event):
+        title = self.search_box.GetValue()
+        include_genres = []
+        exclude_genres = []
+
+        for option in self.options:
+            if option.state == ThreeStateBtn.NEUTRAL:
+                continue
+
+            if option.state == ThreeStateBtn.INCLUDE:
+                include_genres.append(option.genre_id)
+                continue
+
+            exclude_genres.append(option.genre_id)
+                
+        conn = get_connection(dbpath)
+        print(Anime.search(conn, title=title, include_genres=include_genres, exclude_genres=exclude_genres))
 
 
 if __name__ == '__main__':

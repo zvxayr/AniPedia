@@ -6,7 +6,7 @@ from math import ceil
 
 
 class SearchResult(wx.Panel):
-    def __init__(self, parent, anime: Anime = None):
+    def __init__(self, parent, anime: Anime = Anime('', '')):
         super().__init__(parent, size=(180, 240))
 
         self.anime = anime
@@ -16,6 +16,17 @@ class SearchResult(wx.Panel):
     def build_ui(self):
         self.SetBackgroundColour('#2D2F31')
         self.SetSizer(vbox := wx.BoxSizer(wx.VERTICAL))
+
+        vbox.Add(inner := wx.Panel(self), 1, wx.ALIGN_CENTER)
+        inner.SetSizer(hbox := wx.BoxSizer(wx.HORIZONTAL))
+        
+        hbox.Add(txt := wx.StaticText(inner, label=self.anime.title), 1, wx.ALIGN_CENTER)
+        txt.SetForegroundColour('white')
+
+        self.Bind(wx.EVT_LEFT_DOWN, self.select)
+    
+    def select(self, event):
+        print(self.anime)
 
 
 def make_arrow_btn(parent, label):
@@ -50,10 +61,11 @@ def make_arrow_btn(parent, label):
 
 
 class SearchResults(wx.lib.scrolledpanel.ScrolledPanel):
-    def __init__(self, parent, animes: list[Anime] = None):
+    def __init__(self, parent, animes: list[Anime] = None, page = 1):
         super().__init__(parent)
 
         self.animes = animes or []
+        self.page = page
 
         self.build_ui()
 
@@ -82,19 +94,48 @@ class SearchResults(wx.lib.scrolledpanel.ScrolledPanel):
 
         results_box.SetSizer(
             results_gs := wx.GridSizer(rows=2, cols=4, vgap=5, hgap=5))
+        
+        left_btn.Bind(wx.EVT_LEFT_DOWN, self.previous_page)
+        right_btn.Bind(wx.EVT_LEFT_DOWN, self.next_page)
 
+        self.sizer = vbox
         self.SetupScrolling()
         self.search_box = search_box
         self.search_btn = search_btn
         self.results_box = results_box
         self.results_gs = results_gs
-        self.load_animes()
+        self._anime_links = []
+        self.load_animes(self.page)
 
-    def load_animes(self):
-        anime_links = [(SearchResult(self.results_box, a), 0, wx.ALIGN_CENTER)
-                       for a in self.animes]
+    def load_animes(self, page):
+        self._anime_links = self._anime_links or []
 
-        self.results_gs.AddMany(anime_links)
+        for link in self._anime_links:
+            self.results_gs.Hide(link[0])
+            link[0].Destroy()
+
+        self._anime_links = [(SearchResult(self.results_box, a), 0, wx.ALIGN_CENTER)
+                       for a in self.animes[8 * (page - 1): 8 * page]]
+
+        self.results_gs.AddMany(self._anime_links)
+
+        self.sizer.Layout()
+        # self.Fit()
+
+    def previous_page(self, event):
+        if self.page == 1:
+            return
+        
+        self.page -= 1
+        self.load_animes(self.page)
+
+    def next_page(self, event):
+        if self.page == 1 + ((len(self.animes) - 1) // 8):
+            return
+        
+        self.page += 1
+        self.load_animes(self.page)
+
 
 
 if __name__ == '__main__':
@@ -106,8 +147,7 @@ if __name__ == '__main__':
 
     app = wx.App()
     frame = wx.Frame(None, title=title, size=size, style=style)
-    SearchResults(frame, [Anime('A'), Anime('B'), Anime('C'), Anime(
-        'D'), Anime('E'), Anime('F'), Anime('G')])
+    SearchResults(frame, animes)
     frame.Center()
     frame.Show()
     app.MainLoop()
