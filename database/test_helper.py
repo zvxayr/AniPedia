@@ -1,6 +1,5 @@
 import unittest
-from user import User
-from helper import *
+from .helper import *
 from sqlite3 import connect
 from os import path
 

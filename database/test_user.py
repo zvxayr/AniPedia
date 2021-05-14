@@ -1,7 +1,7 @@
 import unittest
-from user import User
-from helper import initialize_database
-from sqlite3 import Connection, connect, IntegrityError, ProgrammingError
+from .user import User
+from .helper import initialize_database
+from sqlite3 import Connection, connect, IntegrityError
 from typing import Optional
 from os import path
 

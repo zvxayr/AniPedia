@@ -1,9 +1,7 @@
 import unittest
-from anime import Anime
-from helper import initialize_database
-from sqlite3 import Connection, connect, IntegrityError, ProgrammingError
-from typing import Optional
-from os import path
+from .anime import Anime
+from .helper import initialize_database
+from sqlite3 import Connection, connect, IntegrityError
 
 
 class TestAnime(unittest.TestCase):
@@ -55,7 +53,8 @@ class TestAnime(unittest.TestCase):
         self.assertEqual(ActionAdventureComedy[0].title, 'Cowboy Bebop')
         self.assertEqual(len(Anime.search(conn, exclude_genres=[1])), 0)
         self.assertEqual(len(Anime.search(conn, exclude_genres=[5])), 2)
-        self.assertEqual(len(Anime.search(conn, include_genres=[4], exclude_genres=[5])), 1)
+        self.assertEqual(
+            len(Anime.search(conn, include_genres=[4], exclude_genres=[5])), 1)
 
     def test_create(self):
         conn = TestAnime.conn
