@@ -19,10 +19,15 @@ $ python -m database.converter
 ```
 
 ### Database (compiled)
-- Download `database.db` from this link and copy it to the root directory of the repository
+- Download `database.db` from this [link](https://mymailmapuaedu-my.sharepoint.com/:u:/g/personal/cpfornoles_mymail_mapua_edu_ph/EcJ1zt65JBlLobFzxfVljZQBJt4Mbi7wIJa6uGlr15jAFA?e=8oAD4d) and copy it to the root directory of the repository
 
 ## Testing
 Move to the root directory of the repository and run the command
 ```console
-$ python -m pip unittest
+$ python -m unittest
+```
+
+## Running
+```console
+$ python -m main
 ```
