@@ -5,7 +5,7 @@
 ### Installation
 ```console
 $ python -m pip install pubsub
-$ python -m pip install wxWidgets
+$ python -m pip install wxPython
 ```
 
 ### Database (build from raw)
